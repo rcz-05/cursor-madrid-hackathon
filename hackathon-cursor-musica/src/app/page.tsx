@@ -52,16 +52,22 @@ export default function Home() {
             </>
           )}
 
-          {/* Cartoon landing overlay (covers the box until tracking starts). */}
+          {/* MemeBongo landing overlay (covers the box until tracking starts). */}
           {!running && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-8 bg-amber-100 px-6 text-center">
               <header>
-                <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-                  🥁 Cámara Cartoon
+                <h1 className="text-6xl font-extrabold tracking-tight text-black sm:text-5xl">
+                  Meme <span className="text-orange-500">Bongo</span>
                 </h1>
                 <p className="mx-auto mt-3 max-w-md text-lg font-medium text-black/70">
-                  Dale al botón, acepta la cámara y golpea tus brazos y piernas
-                  con la mano contraria para tocar la batería.
+                  i like to Bongo bongo meme bongo
+                </p>
+                <p className="text-sm text-black/70">
+                  Cursor Madrid hackaton <span className="text-orange-500">#3</span>
+                </p>
+                <p className="mx-auto mt-3 max-w-md text-sm font-medium text-black/60">
+                  Acepta la cámara y golpea tus brazos y piernas con la mano
+                  contraria para tocar la batería.
                 </p>
               </header>
 
