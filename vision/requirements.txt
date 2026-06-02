@@ -1,0 +1,7 @@
+# Vision backend (body-drum) — Python deps
+fastapi
+uvicorn[standard]
+opencv-python
+numpy
+pillow
+libreyolo
