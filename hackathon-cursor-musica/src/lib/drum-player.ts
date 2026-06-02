@@ -23,6 +23,8 @@ const MEME_SAMPLE_URLS = [
   "/samples/meme2.mp3",
   "/samples/meme3.mp3",
   "/samples/meme4.mp3",
+  "/samples/ahrrrr.ogg",
+  "/samples/eldiablo.ogg",
 ] as const;
 
 export class DrumPlayer {
