@@ -1,6 +1,6 @@
 // Shared vision contract — mirrors vision/schemas.py on the Python backend.
 // The music branch can listen for the `vision:hit` browser event dispatched by
-// <VisionClient />, or read these types directly.
+// the vision pipeline (see use-vision-pipeline.ts), or read these types directly.
 
 export type DrumZone =
   | "upper_right_arm"
