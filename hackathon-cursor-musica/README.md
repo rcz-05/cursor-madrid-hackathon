@@ -1,4 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# hackathon-cursor-musica
+
+E-drum service demo: six trigger codes, Web Audio playback in the browser, and a validation API.
+
+## Drum codes
+
+| Code | Pad |
+|------|-----|
+| `feet_1` | Kick |
+| `feet_2` | Hi-hat pedal |
+| `arm_left_low` | Snare |
+| `arm_left_high` | Hi-hat |
+| `arm_right_low` | Low tom |
+| `arm_right_high` | Crash |
+
+Keyboard after enabling audio: `1` `2` `q` `w` `e` `r`.
+
+## API
+
+```bash
+curl -X POST http://localhost:3000/api/hit \
+  -H "Content-Type: application/json" \
+  -d '{"code":"arm_left_low","velocity":0.9}'
+```
+
+Audio plays in the browser when you tap pads; the API validates codes for hardware or other clients (add WebSockets later to trigger remote pads).
+
+Drum WAVs live in `public/samples/` (see `public/samples/ATTRIBUTION.md`). They load automatically after **Enable audio**.
+
+Test page: [http://localhost:3000/music-test](http://localhost:3000/music-test)
 
 ## Getting Started
 
