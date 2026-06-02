@@ -1,5 +1,7 @@
 "use client";
 
+import { GuitarHeroNotes } from "@/components/guitar-hero-notes";
+import { DrumPlayer } from "@/lib/drum-player";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type CameraState = "idle" | "loading" | "active" | "error";
@@ -28,6 +30,9 @@ export default function Home() {
   const requestCamera = useCallback(async () => {
     setError(null);
     setState("loading");
+
+    // Desbloquea el audio aprovechando el gesto del usuario (clic).
+    void DrumPlayer.init().catch(() => {});
 
     if (!navigator.mediaDevices?.getUserMedia) {
       setState("error");
@@ -74,13 +79,14 @@ export default function Home() {
             muted
             className="h-full w-full object-cover"
           />
-          <span className="cartoon absolute left-4 top-4 flex items-center gap-2 rounded-full bg-red-500 px-4 py-2 text-sm font-extrabold text-white">
+          <GuitarHeroNotes enabled={state === "active"} />
+          <span className="cartoon absolute left-4 top-4 z-20 flex items-center gap-2 rounded-full bg-red-500 px-4 py-2 text-sm font-extrabold text-white">
             <span className="h-3 w-3 animate-pulse rounded-full bg-white" />
             EN DIRECTO
           </span>
           <button
             onClick={stopCamera}
-            className="cartoon-btn absolute right-4 top-4 rounded-full bg-yellow-300 px-5 py-2 text-sm font-extrabold text-black"
+            className="cartoon-btn absolute right-4 top-4 z-20 rounded-full bg-yellow-300 px-5 py-2 text-sm font-extrabold text-black"
           >
             ✕ Apagar cámara
           </button>
