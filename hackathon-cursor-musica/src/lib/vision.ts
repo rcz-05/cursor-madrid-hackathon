@@ -1,6 +1,6 @@
 // Shared vision contract — mirrors vision/schemas.py on the Python backend.
-// The music branch can import these types and listen for the `vision:hit`
-// browser event dispatched by <VisionClient />.
+// The music branch can listen for the `vision:hit` browser event dispatched by
+// <VisionClient />, or read these types directly.
 
 export type DrumZone =
   | "upper_right_arm"
@@ -21,9 +21,23 @@ export type VisionEvent = {
   timestamp: number;
 };
 
+// One detected pose keypoint, normalized to 0..1 of the frame.
+export type Keypoint = { name: string; x: number; y: number };
+
+// A limb "capsule" zone as a normalized segment.
+export type ZoneSegment = {
+  zone: DrumZone;
+  ax: number;
+  ay: number;
+  bx: number;
+  by: number;
+};
+
 export type VisionDebug = {
   person_detected?: boolean;
   zones?: string[];
+  keypoints?: Keypoint[];
+  segments?: ZoneSegment[];
   fps?: number;
   device?: string;
 };
@@ -33,15 +47,21 @@ export type VisionMessage = {
   debug?: VisionDebug;
 };
 
-// Suggested zone -> drum-sound mapping (the music branch owns the real sounds).
-export const ZONE_SOUND: Record<DrumZone, string> = {
-  upper_right_arm: "snare",
-  upper_left_arm: "clap",
-  lower_right_arm: "hihat",
-  lower_left_arm: "tom",
-  right_leg: "kick",
-  left_leg: "floor_tom",
-};
+// Skeleton edges drawn between keypoints (COCO subset relevant to body drum).
+export const SKELETON_EDGES: [string, string][] = [
+  ["left_shoulder", "right_shoulder"],
+  ["left_shoulder", "left_elbow"],
+  ["left_elbow", "left_wrist"],
+  ["right_shoulder", "right_elbow"],
+  ["right_elbow", "right_wrist"],
+  ["left_shoulder", "left_hip"],
+  ["right_shoulder", "right_hip"],
+  ["left_hip", "right_hip"],
+  ["left_hip", "left_knee"],
+  ["left_knee", "left_ankle"],
+  ["right_hip", "right_knee"],
+  ["right_knee", "right_ankle"],
+];
 
 // Name of the browser CustomEvent fired for each detected hit.
 export const VISION_HIT_EVENT = "vision:hit";

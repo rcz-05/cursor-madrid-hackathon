@@ -27,9 +27,25 @@ class VisionEvent(TypedDict):
     timestamp: float
 
 
+class KeypointDot(TypedDict):
+    name: str
+    x: float  # normalized 0..1
+    y: float  # normalized 0..1
+
+
+class ZoneSegment(TypedDict):
+    zone: str
+    ax: float  # normalized endpoint A
+    ay: float
+    bx: float  # normalized endpoint B
+    by: float
+
+
 class DebugInfo(TypedDict, total=False):
     person_detected: bool
     zones: List[str]
+    keypoints: List[KeypointDot]
+    segments: List[ZoneSegment]
     fps: float
     device: str
 

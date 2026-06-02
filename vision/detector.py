@@ -23,6 +23,27 @@ from schemas import VisionEvent, VisionResult
 
 Point = Tuple[float, float]
 
+# Full 17-keypoint COCO name list (index -> name), used for the draw overlay.
+COCO_KEYPOINT_NAMES = [
+    "nose",
+    "left_eye",
+    "right_eye",
+    "left_ear",
+    "right_ear",
+    "left_shoulder",
+    "right_shoulder",
+    "left_elbow",
+    "right_elbow",
+    "left_wrist",
+    "right_wrist",
+    "left_hip",
+    "right_hip",
+    "left_knee",
+    "right_knee",
+    "left_ankle",
+    "right_ankle",
+]
+
 # COCO keypoint indices produced by the pose model.
 KEYPOINTS = {
     "left_shoulder": 5,
@@ -89,6 +110,7 @@ class BodyDrumDetector:
     # ------------------------------------------------------------------ #
     def detect(self, frame_bgr: np.ndarray) -> VisionResult:
         now = time.time()
+        h, w = frame_bgr.shape[:2]
         result = self.model(frame_bgr)
 
         keypoints = getattr(result, "keypoints", None)
@@ -103,8 +125,33 @@ class BodyDrumDetector:
         conf = _to_numpy(keypoints.conf)      # (num_people, 17)
 
         person_index = self._select_person(result, xy)
-        points = self._extract_points(xy[person_index], conf[person_index])
-        return self.process_points(points, now)
+        person_xy = xy[person_index]
+        person_conf = conf[person_index]
+        points = self._extract_points(person_xy, person_conf)
+
+        outcome = self.process_points(points, now)
+        # Attach a normalized (0..1) draw overlay so the frontend can render
+        # keypoint circles, the skeleton, and the six zone capsules.
+        outcome["debug"]["keypoints"] = self._overlay_keypoints(person_xy, person_conf, w, h)
+        outcome["debug"]["segments"] = self._overlay_segments(points, w, h)
+        return outcome
+
+    def _overlay_keypoints(self, xy: np.ndarray, conf: np.ndarray, w: int, h: int):
+        dots = []
+        for idx, name in enumerate(COCO_KEYPOINT_NAMES):
+            if conf[idx] >= MIN_KEYPOINT_CONF:
+                dots.append({"name": name, "x": float(xy[idx][0]) / w, "y": float(xy[idx][1]) / h})
+        return dots
+
+    def _overlay_segments(self, points: Dict[str, Point], w: int, h: int):
+        segs = []
+        for zone, (a, b) in ZONE_DEFS.items():
+            if a in points and b in points:
+                (ax, ay), (bx, by) = points[a], points[b]
+                segs.append(
+                    {"zone": zone, "ax": ax / w, "ay": ay / h, "bx": bx / w, "by": by / h}
+                )
+        return segs
 
     # ------------------------------------------------------------------ #
     # Person selection: largest bounding box (closest / most prominent).
