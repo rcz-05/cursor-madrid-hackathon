@@ -10,7 +10,13 @@ import {
 } from "@/lib/drum-hit-display";
 import { subscribeDrumHits } from "@/lib/drum-hit-bus";
 import type { DrumCode } from "@/lib/drum-codes";
+import { Rock_Salt } from "next/font/google";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+const rockSalt = Rock_Salt({
+  weight: "400",
+  subsets: ["latin"],
+});
 
 const HIT_VISIBLE_MS = 650;
 
@@ -77,7 +83,7 @@ export function DrumHitOverlay() {
             {hit && colors && (
               <span
                 key={hit.id}
-                className="drum-hit-label select-none text-center font-black uppercase leading-[0.9] tracking-tight"
+                className={`drum-hit-label ${rockSalt.className} select-none text-center uppercase leading-[0.9] tracking-tight`}
                 style={
                   {
                     color: colors.foreground,

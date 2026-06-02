@@ -3,7 +3,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "MemeBongo — Cómo se juega",
-  description: "Aprende a tocar la batería moviendo tu cuerpo frente a la cámara",
+  description:
+    "Aprende a tocar la batería moviendo tu cuerpo frente a la cámara",
 };
 
 // Cada parte del cuerpo es un instrumento. Los colores coinciden con las
@@ -103,6 +104,7 @@ export default function Home() {
             Conviértete en una batería humana: muévete delante de la cámara y
             haz sonar los tambores con tu cuerpo. 🥁
           </p>
+          <p>Madrid Cursor hackaton #3</p>
         </header>
 
         {/* Empieza ya */}

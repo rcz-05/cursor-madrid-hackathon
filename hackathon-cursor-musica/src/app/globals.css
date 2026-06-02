@@ -182,6 +182,50 @@
   will-change: transform, opacity;
 }
 
+/* Guitar Hero: las notas salen cerca (abajo) y suben alejándose hacia el
+   horizonte (arriba), sobre un suelo inclinado en perspectiva. */
+@keyframes guitar-note-approach {
+  0% {
+    transform: translate(-50%, -50%) translateY(32vh) translateZ(460px)
+      rotateX(52deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translateY(-24vh) translateZ(-1200px)
+      rotateX(52deg);
+    opacity: 0.95;
+  }
+}
+
+.guitar-note {
+  animation: guitar-note-approach var(--fall-ms, 4500ms) linear forwards;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+.guitar-note-hit {
+  animation: guitar-note-hit 120ms ease-out forwards;
+}
+
+@keyframes guitar-note-hit {
+  to {
+    transform: translate(-50%, -50%) scale(1.35);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guitar-note {
+    animation-duration: 6500ms;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .drum-hit-label {
     animation: none;
