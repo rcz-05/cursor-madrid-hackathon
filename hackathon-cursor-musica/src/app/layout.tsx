@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cursor Música — E-Drum Demo",
-  description: "Six-code e-drum service with Web Audio",
+  title: "Cámara Cartoon",
+  description: "Da acceso a tu cámara o conéctala desde el móvil con un QR",
 };
 
 export default function RootLayout({
