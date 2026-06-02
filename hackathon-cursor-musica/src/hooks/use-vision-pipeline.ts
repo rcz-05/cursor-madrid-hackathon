@@ -115,10 +115,6 @@ export function useVisionPipeline() {
         audio: false,
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
 
       const ws = new WebSocket(VISION_WS_URL);
       wsRef.current = ws;
@@ -166,6 +162,16 @@ export function useVisionPipeline() {
       }
     }
   }, [sendFrame]);
+
+  // <video> mounts only when `running` is true (after WS open), so attach the stream then.
+  useEffect(() => {
+    if (!running) return;
+    const video = videoRef.current;
+    const stream = streamRef.current;
+    if (!video || !stream) return;
+    video.srcObject = stream;
+    void video.play().catch(() => {});
+  }, [running]);
 
   // Draw the pose overlay while running, on its own requestAnimationFrame loop.
   useEffect(() => {

@@ -203,40 +203,26 @@
   }
 }
 
-/* Pop al "golpear" la línea (nota meme) */
-@keyframes guitar-note-pop {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(2.4);
-    opacity: 0;
-  }
-}
-
-/* Pulso de la línea de golpeo cuando cae una nota meme */
-@keyframes guitar-line-flash {
-  0% {
-    opacity: 0.5;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.5;
-  }
-}
-
 .guitar-note {
-  animation: guitar-note-approach var(--fall-ms, 2800ms) linear forwards;
+  animation: guitar-note-approach var(--fall-ms, 4500ms) linear forwards;
   transform-style: preserve-3d;
   will-change: transform, opacity;
 }
 
+.guitar-note-hit {
+  animation: guitar-note-hit 120ms ease-out forwards;
+}
+
+@keyframes guitar-note-hit {
+  to {
+    transform: translate(-50%, -50%) scale(1.35);
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .guitar-note {
-    animation-duration: 4200ms;
+    animation-duration: 6500ms;
   }
 }
 

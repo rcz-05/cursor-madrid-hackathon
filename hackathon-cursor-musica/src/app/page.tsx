@@ -46,7 +46,7 @@ export default function Home() {
             ✕ Apagar cámara
           </button>
           <span className="cartoon absolute bottom-4 left-4 z-20 rounded-full bg-white px-4 py-2 text-sm font-extrabold text-black">
-            🥁 {hitCount} golpes · {fps} fps
+            🎮 Golpea las notas en la línea · 🥁 {hitCount} · {fps} fps
           </span>
         </div>
 
