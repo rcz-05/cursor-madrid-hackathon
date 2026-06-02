@@ -4,6 +4,7 @@ import {
   type DrumCode,
   type DrumInput,
 } from "./drum-codes";
+import { showDrumToast } from "./drum-toast";
 
 export { Drum, type DrumAlias, type DrumInput } from "./drum-codes";
 
@@ -85,6 +86,8 @@ export class DrumPlayer {
     if (!this.ctx) return;
     const resolved = resolveDrumCode(code);
     if (!resolved) return;
+
+    showDrumToast(resolved);
 
     const gain = Math.min(1, Math.max(0.1, velocity));
     const buffer = this.buffers[resolved];
