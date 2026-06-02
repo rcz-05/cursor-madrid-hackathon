@@ -10,11 +10,11 @@ export const metadata: Metadata = {
 
 export default function MusicTestPage() {
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-zinc-50 dark:bg-zinc-950">
-      <nav className="border-b border-zinc-200 px-6 py-3 dark:border-zinc-800">
+    <div className="flex min-h-full flex-1 flex-col bg-zinc-50 text-black">
+      <nav className="border-b border-zinc-200 px-6 py-3">
         <Link
           href="/"
-          className="text-sm text-zinc-500 transition hover:text-zinc-900 dark:hover:text-zinc-200"
+          className="text-sm text-zinc-600 transition hover:text-black"
         >
           ← Home
         </Link>
@@ -26,10 +26,10 @@ export default function MusicTestPage() {
       />
 
       <section className="mx-auto w-full max-w-lg px-6 pb-12">
-        <h2 className="mb-3 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+        <h2 className="mb-3 text-sm font-medium text-zinc-700">
           Sample files
         </h2>
-        <ul className="space-y-1 font-mono text-xs text-zinc-500">
+        <ul className="space-y-1 font-mono text-xs text-zinc-600">
           {DRUM_CODES.map((code) => (
             <li key={code}>
               <a

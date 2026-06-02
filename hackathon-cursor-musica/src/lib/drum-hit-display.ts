@@ -35,7 +35,7 @@ export const DRUM_DISPLAY_NAMES: Record<DrumCode, string> = {
   arm_left_low: "SNARE",
   arm_left_high: "HI-HAT",
   arm_right_low: "LOW TOM",
-  arm_right_high: "CRASH",
+  arm_right_high: "MEME",
 };
 
 export const DRUM_HIT_COLORS: Record<

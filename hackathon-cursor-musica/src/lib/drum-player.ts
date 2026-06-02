@@ -17,11 +17,20 @@ const SAMPLE_URLS: Record<DrumCode, string> = {
   arm_right_high: "/samples/arm_right_high.wav",
 };
 
+/** Random meme clip on right-top (`arm_right_high`) instead of the crash cymbal. */
+const MEME_SAMPLE_URLS = [
+  "/samples/meme1.mp3",
+  "/samples/meme2.mp3",
+  "/samples/meme3.mp3",
+  "/samples/meme4.mp3",
+] as const;
+
 export class DrumPlayer {
   private static shared: DrumPlayer | null = null;
 
   private ctx: AudioContext | null = null;
   private buffers: Partial<Record<DrumCode, AudioBuffer>> = {};
+  private memeBuffers: AudioBuffer[] = [];
   private loadPromise: Promise<void> | null = null;
 
   /** Shared player for `DrumPlayer.play()` — call once after a user gesture. */
@@ -65,8 +74,8 @@ export class DrumPlayer {
     if (this.loadPromise) return this.loadPromise;
 
     this.loadPromise = (async () => {
-      await Promise.all(
-        DRUM_CODES.map(async (code) => {
+      await Promise.all([
+        ...DRUM_CODES.map(async (code) => {
           try {
             const res = await fetch(SAMPLE_URLS[code]);
             if (!res.ok) return;
@@ -76,7 +85,18 @@ export class DrumPlayer {
             // Fall back to synthesized voice for this pad.
           }
         }),
-      );
+        ...MEME_SAMPLE_URLS.map(async (url) => {
+          try {
+            const res = await fetch(url);
+            if (!res.ok) return;
+            const arr = await res.arrayBuffer();
+            const buffer = await this.ctx!.decodeAudioData(arr);
+            this.memeBuffers.push(buffer);
+          } catch {
+            // Right-top falls back to crash sample or synth.
+          }
+        }),
+      ]);
     })();
 
     return this.loadPromise;
@@ -90,6 +110,16 @@ export class DrumPlayer {
     showDrumToast(resolved);
 
     const gain = Math.min(1, Math.max(0.1, velocity));
+
+    if (resolved === "arm_right_high" && this.memeBuffers.length > 0) {
+      const meme =
+        this.memeBuffers[
+          Math.floor(Math.random() * this.memeBuffers.length)
+        ]!;
+      this.playBuffer(meme, gain);
+      return;
+    }
+
     const buffer = this.buffers[resolved];
     if (buffer) {
       this.playBuffer(buffer, gain);

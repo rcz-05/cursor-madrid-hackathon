@@ -32,6 +32,7 @@ export const DRUM_ALIASES = {
   hihat: "arm_left_high",
   tom_low: "arm_right_low",
   crash: "arm_right_high",
+  arm_right_top: "arm_right_high",
 } as const satisfies Record<string, DrumCode>;
 
 export type DrumAlias = keyof typeof DRUM_ALIASES;

@@ -59,12 +59,12 @@ export function DrumKit({
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col gap-8 px-6 py-12">
-      <header className="space-y-2 text-center">
-        <p className="font-mono text-xs uppercase tracking-widest text-zinc-500">
+      <header className="space-y-2 text-center text-black">
+        <p className="font-mono text-xs uppercase tracking-widest text-zinc-600">
           E-drum service
         </p>
         <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
-        <p className="text-sm text-zinc-500">{subtitle}</p>
+        <p className="text-sm text-zinc-600">{subtitle}</p>
       </header>
 
       {!ready ? (
@@ -72,7 +72,7 @@ export function DrumKit({
           type="button"
           disabled={loading}
           onClick={() => void unlock()}
-          className="rounded-2xl bg-zinc-900 px-6 py-4 text-center text-lg font-medium text-white transition hover:bg-zinc-700 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+          className="rounded-2xl bg-zinc-900 px-6 py-4 text-center text-lg font-medium text-white transition hover:bg-zinc-700 disabled:opacity-60"
         >
           {loading ? "Loading samples…" : "Enable audio"}
         </button>
@@ -86,12 +86,12 @@ export function DrumKit({
                 e.preventDefault();
                 hit(code);
               }}
-              className="flex min-h-[88px] flex-col items-center justify-center gap-1 rounded-2xl border border-zinc-200 bg-white px-3 py-4 text-center shadow-sm transition active:scale-[0.97] active:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:active:bg-zinc-800"
+              className="flex min-h-[88px] flex-col items-center justify-center gap-1 rounded-2xl border border-zinc-200 bg-white px-3 py-4 text-center text-black shadow-sm transition active:scale-[0.97] active:bg-zinc-50"
             >
               <span className="text-lg font-semibold">{DRUM_LABELS[code]}</span>
-              <span className="font-mono text-xs text-zinc-500">{code}</span>
+              <span className="font-mono text-xs text-zinc-600">{code}</span>
               {PAD_KEYS[code] && (
-                <span className="mt-1 rounded bg-zinc-100 px-1.5 font-mono text-[10px] text-zinc-400 dark:bg-zinc-800">
+                <span className="mt-1 rounded bg-zinc-100 px-1.5 font-mono text-[10px] text-zinc-500">
                   {PAD_KEYS[code]}
                 </span>
               )}
