@@ -65,7 +65,7 @@ export default function Home() {
   // Vista en directo casi a pantalla completa.
   if (state === "active") {
     return (
-      <main className="fixed inset-3 flex flex-col overflow-hidden sm:inset-5">
+      <main className="fixed inset-3 flex flex-col overflow-hidden bg-amber-100 sm:inset-5">
         <div className="cartoon-lg relative flex flex-1 items-center justify-center overflow-hidden rounded-3xl bg-black">
           <video
             ref={videoRef}
@@ -90,7 +90,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
+    <main className="flex flex-1 flex-col items-center justify-center gap-10 bg-amber-100 px-6 py-16">
       <header className="text-center">
         <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
           📸 Cámara Cartoon

@@ -1,4 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# hackathon-cursor-musica
+
+E-drum service demo: six trigger codes and Web Audio playback in the browser.
+
+## Drum codes
+
+| Code | Pad |
+|------|-----|
+| `feet_1` | Kick |
+| `feet_2` | Hi-hat pedal |
+| `arm_left_low` | Snare |
+| `arm_left_high` | Hi-hat |
+| `arm_right_low` | Low tom |
+| `arm_right_high` | Crash |
+
+Keyboard after enabling audio: `1` `2` `q` `w` `e` `r`.
+
+## DrumPlayer
+
+```ts
+import { Drum, DrumPlayer } from "@/lib/drum-player";
+
+// After a click/tap (browser autoplay policy):
+await DrumPlayer.init();
+DrumPlayer.play("feet_right"); // alias → feet_2
+DrumPlayer.play(Drum.kick);
+
+// Or your own instance:
+const player = new DrumPlayer();
+await player.unlock();
+player.play("arm_left_low");
+```
+
+Drum WAVs live in `public/samples/` (see `public/samples/ATTRIBUTION.md`). They load automatically after **Enable audio**.
+
+Test page: [http://localhost:3000/music-test](http://localhost:3000/music-test)
 
 ## Getting Started
 
