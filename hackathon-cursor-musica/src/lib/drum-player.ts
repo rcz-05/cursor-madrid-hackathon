@@ -1,4 +1,11 @@
-import { DRUM_CODES, type DrumCode } from "./drum-codes";
+import {
+  DRUM_CODES,
+  resolveDrumCode,
+  type DrumCode,
+  type DrumInput,
+} from "./drum-codes";
+
+export { Drum, type DrumAlias, type DrumInput } from "./drum-codes";
 
 const SAMPLE_URLS: Record<DrumCode, string> = {
   feet_1: "/samples/feet_1.wav",
@@ -10,9 +17,29 @@ const SAMPLE_URLS: Record<DrumCode, string> = {
 };
 
 export class DrumPlayer {
+  private static shared: DrumPlayer | null = null;
+
   private ctx: AudioContext | null = null;
   private buffers: Partial<Record<DrumCode, AudioBuffer>> = {};
   private loadPromise: Promise<void> | null = null;
+
+  /** Shared player for `DrumPlayer.play()` — call once after a user gesture. */
+  static async init(): Promise<DrumPlayer> {
+    const player = DrumPlayer.shared ?? new DrumPlayer();
+    DrumPlayer.shared = player;
+    await player.unlock();
+    return player;
+  }
+
+  /** Play on the shared instance (requires `init()` first). */
+  static play(code: DrumInput, velocity = 1): void {
+    if (!DrumPlayer.shared) {
+      throw new Error(
+        "DrumPlayer not ready — call await DrumPlayer.init() after a user gesture.",
+      );
+    }
+    DrumPlayer.shared.play(code, velocity);
+  }
 
   async unlock(): Promise<void> {
     if (!this.ctx) {
@@ -54,17 +81,20 @@ export class DrumPlayer {
     return this.loadPromise;
   }
 
-  play(code: DrumCode, velocity = 1): void {
+  play(code: DrumInput, velocity = 1): void {
     if (!this.ctx) return;
+    const resolved = resolveDrumCode(code);
+    if (!resolved) return;
+
     const gain = Math.min(1, Math.max(0.1, velocity));
-    const buffer = this.buffers[code];
+    const buffer = this.buffers[resolved];
     if (buffer) {
       this.playBuffer(buffer, gain);
       return;
     }
 
     const t = this.ctx.currentTime;
-    switch (code) {
+    switch (resolved) {
       case "feet_1":
         this.kick(t, gain);
         break;

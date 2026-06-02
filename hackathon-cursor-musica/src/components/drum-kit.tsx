@@ -6,7 +6,7 @@ import {
   type DrumCode,
 } from "@/lib/drum-codes";
 import { DrumPlayer } from "@/lib/drum-player";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const PAD_KEYS: Partial<Record<DrumCode, string>> = {
   feet_1: "1",
@@ -20,58 +20,30 @@ const PAD_KEYS: Partial<Record<DrumCode, string>> = {
 type DrumKitProps = {
   title?: string;
   subtitle?: string;
-  apiTestAll?: boolean;
 };
 
 export function DrumKit({
   title = "Cursor Música",
-  subtitle = "Six codes · WAV samples · POST /api/hit",
-  apiTestAll = false,
+  subtitle = "Six codes · WAV samples · DrumPlayer",
 }: DrumKitProps = {}) {
-  const playerRef = useRef<DrumPlayer | null>(null);
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [lastHit, setLastHit] = useState<string | null>(null);
-  const [apiLog, setApiLog] = useState<string | null>(null);
-
-  const ensurePlayer = useCallback(() => {
-    if (!playerRef.current) {
-      playerRef.current = new DrumPlayer();
-    }
-    return playerRef.current;
-  }, []);
 
   const unlock = useCallback(async () => {
     setLoading(true);
-    const player = ensurePlayer();
-    await player.unlock();
+    const player = await DrumPlayer.init();
     setReady(player.ready);
     setLoading(false);
-  }, [ensurePlayer]);
+  }, []);
 
   const hit = useCallback(
-    async (code: DrumCode, viaApi = false) => {
+    (code: DrumCode) => {
       if (!ready) return;
-      const player = ensurePlayer();
-      player.play(code);
-
-      if (viaApi) {
-        const res = await fetch("/api/hit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code, velocity: 0.9 }),
-        });
-        const data = await res.json();
-        setApiLog(
-          res.ok
-            ? `API ✓ ${data.label} (${data.code})`
-            : `API ✗ ${data.error ?? res.status}`,
-        );
-      }
-
+      DrumPlayer.play(code);
       setLastHit(`${DRUM_LABELS[code]} · ${code}`);
     },
-    [ensurePlayer, ready],
+    [ready],
   );
 
   useEffect(() => {
@@ -80,7 +52,7 @@ export function DrumKit({
       const code = DRUM_CODES.find((c) => PAD_KEYS[c] === e.key);
       if (code) {
         e.preventDefault();
-        void hit(code);
+        hit(code);
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -114,7 +86,7 @@ export function DrumKit({
               type="button"
               onPointerDown={(e) => {
                 e.preventDefault();
-                void hit(code);
+                hit(code);
               }}
               className="flex min-h-[88px] flex-col items-center justify-center gap-1 rounded-2xl border border-zinc-200 bg-white px-3 py-4 text-center shadow-sm transition active:scale-[0.97] active:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:active:bg-zinc-800"
             >
@@ -130,44 +102,9 @@ export function DrumKit({
         </div>
       )}
 
-      {ready && apiTestAll && (
-        <div className="space-y-2">
-          <p className="text-center text-xs font-medium uppercase tracking-wide text-zinc-500">
-            API test (play + POST)
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {DRUM_CODES.map((code) => (
-              <button
-                key={code}
-                type="button"
-                onClick={() => void hit(code, true)}
-                className="rounded-lg border border-zinc-200 px-3 py-1.5 font-mono text-xs transition hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
-              >
-                {code}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {ready && !apiTestAll && (
-        <button
-          type="button"
-          onClick={() => void hit("feet_1", true)}
-          className="text-sm text-zinc-500 underline-offset-2 hover:underline"
-        >
-          Test API with kick (feet_1)
-        </button>
-      )}
-
       {lastHit && (
         <p className="text-center font-mono text-sm text-zinc-600 dark:text-zinc-400">
           Last: {lastHit}
-        </p>
-      )}
-      {apiLog && (
-        <p className="text-center font-mono text-xs text-emerald-600 dark:text-emerald-400">
-          {apiLog}
         </p>
       )}
     </div>

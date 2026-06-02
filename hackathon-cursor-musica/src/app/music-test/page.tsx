@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Music test — Cursor Música",
-  description: "Test e-drum pads, samples, and the /api/hit endpoint",
+  description: "Test e-drum pads and WAV samples",
 };
 
 export default function MusicTestPage() {
@@ -22,8 +22,7 @@ export default function MusicTestPage() {
 
       <DrumKit
         title="Music test"
-        subtitle="Pads, keyboard (1 2 q w e r), and per-code API checks"
-        apiTestAll
+        subtitle="Pads and keyboard (1 2 q w e r)"
       />
 
       <section className="mx-auto w-full max-w-lg px-6 pb-12">

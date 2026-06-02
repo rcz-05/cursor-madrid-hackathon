@@ -1,6 +1,6 @@
 # hackathon-cursor-musica
 
-E-drum service demo: six trigger codes, Web Audio playback in the browser, and a validation API.
+E-drum service demo: six trigger codes and Web Audio playback in the browser.
 
 ## Drum codes
 
@@ -15,15 +15,21 @@ E-drum service demo: six trigger codes, Web Audio playback in the browser, and a
 
 Keyboard after enabling audio: `1` `2` `q` `w` `e` `r`.
 
-## API
+## DrumPlayer
 
-```bash
-curl -X POST http://localhost:3000/api/hit \
-  -H "Content-Type: application/json" \
-  -d '{"code":"arm_left_low","velocity":0.9}'
+```ts
+import { Drum, DrumPlayer } from "@/lib/drum-player";
+
+// After a click/tap (browser autoplay policy):
+await DrumPlayer.init();
+DrumPlayer.play("feet_right"); // alias → feet_2
+DrumPlayer.play(Drum.kick);
+
+// Or your own instance:
+const player = new DrumPlayer();
+await player.unlock();
+player.play("arm_left_low");
 ```
-
-Audio plays in the browser when you tap pads; the API validates codes for hardware or other clients (add WebSockets later to trigger remote pads).
 
 Drum WAVs live in `public/samples/` (see `public/samples/ATTRIBUTION.md`). They load automatically after **Enable audio**.
 

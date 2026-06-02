@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Cursor Música — E-Drum Demo",
-  description: "Six-code e-drum service with Web Audio and /api/hit",
+  description: "Six-code e-drum service with Web Audio",
 };
 
 export default function RootLayout({
