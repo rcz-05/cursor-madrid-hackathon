@@ -160,3 +160,131 @@
     opacity: 1;
   }
 }
+
+/* Drum Hero — shared easing (ease-out quint) */
+:root {
+  --drum-hero-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Grade feedback — enter/exit, transform + opacity only */
+@keyframes drum-hero-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(6px);
+  }
+  22% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  58% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.04) translateY(-10px);
+  }
+}
+
+.drum-hero-flash {
+  animation: drum-hero-flash 280ms var(--drum-hero-ease-out) forwards;
+  will-change: transform, opacity;
+}
+
+/* Count-in beat — one-shot pop per number (not continuous pulse) */
+@keyframes drum-hero-count {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+}
+
+.drum-hero-count {
+  animation: drum-hero-count 420ms var(--drum-hero-ease-out) forwards;
+  will-change: transform, opacity;
+}
+
+/* End-of-song score panel */
+@keyframes drum-hero-score-in {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.drum-hero-score-in {
+  animation: drum-hero-score-in 300ms var(--drum-hero-ease-out) forwards;
+  will-change: transform, opacity;
+}
+
+.drum-hero-overlay-note {
+  will-change: transform, opacity;
+  height: var(--drum-hero-note-size);
+  /* Referencing the lane vars here keeps Lightning CSS from tree-shaking them
+     (they are otherwise only used from inline styles). */
+  top: calc(
+    var(--drum-hero-note-spawn) +
+      var(--drum-hero-note-progress, 0) * var(--drum-hero-note-travel)
+  );
+  filter: drop-shadow(0 3px 8px rgb(0 0 0 / 95%))
+    drop-shadow(0 0 14px rgb(0 0 0 / 70%));
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .drum-hero-flash,
+  .drum-hero-count,
+  .drum-hero-score-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .drum-hero-overlay-note {
+    will-change: auto;
+  }
+}
+
+/* Drum Hero camera overlay — readable over live video */
+.drum-hero-overlay-text {
+  text-shadow:
+    0 0 24px rgb(0 0 0 / 100%),
+    0 2px 4px rgb(0 0 0 / 100%),
+    0 4px 16px rgb(0 0 0 / 90%);
+}
+
+.drum-hero-overlay-line {
+  top: calc(100% - var(--drum-hero-hit-from-bottom));
+  filter: drop-shadow(0 2px 6px rgb(0 0 0 / 100%))
+    drop-shadow(0 0 10px rgb(0 0 0 / 80%));
+}
+
+.drum-hero-overlay-lane {
+  container-type: size;
+  --drum-hero-hit-from-bottom: 4rem;
+  --drum-hero-note-spawn: 5%;
+  --drum-hero-note-size: 0.875rem;
+  --drum-hero-note-travel: calc(
+    100% - var(--drum-hero-hit-from-bottom) - var(--drum-hero-note-size) -
+      var(--drum-hero-note-spawn)
+  );
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 8%);
+}
+
+@media (min-width: 640px) {
+  .drum-hero-overlay-lane {
+    --drum-hero-hit-from-bottom: 4.5rem;
+  }
+}
