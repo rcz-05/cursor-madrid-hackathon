@@ -46,6 +46,7 @@ class DebugInfo(TypedDict, total=False):
     zones: List[str]
     keypoints: List[KeypointDot]
     segments: List[ZoneSegment]
+    zone_radius: float
     fps: float
     device: str
 

@@ -61,22 +61,35 @@ def test_hit_logic() -> None:
     print("ok  no re-fire while staying inside")
 
 
-def test_self_zone_filter() -> None:
+def _fresh_detector():
     from detector import BodyDrumDetector, VisionState
 
     det = BodyDrumDetector.__new__(BodyDrumDetector)
     det.device = "test"
     det.state = VisionState()
+    return det
 
-    # Right wrist near its own lower right arm should be ignored.
-    pts = {
-        "right_elbow": (400, 100),
-        "right_wrist": (400, 100),
-    }
-    det.process_points(pts, 1000.0)
-    res = det.process_points(pts, 1000.05)
-    assert all(e["zone"] != "lower_right_arm" for e in res["events"])
-    print("ok  self-zone filtered")
+
+def test_opposite_hand_rule() -> None:
+    """A wrist must NOT trigger a same-side arm zone (only the opposite hand)."""
+    det = _fresh_detector()
+    # upper_left_arm zone; the LEFT wrist (same side) slams into it fast.
+    base = {"left_shoulder": (300, 100), "left_elbow": (400, 100)}
+    det.process_points({**base, "left_wrist": (50, 400)}, 1000.0)
+    res = det.process_points({**base, "left_wrist": (350, 100)}, 1000.05)
+    assert all(e["zone"] != "upper_left_arm" for e in res["events"]), res["events"]
+    print("ok  same-side arm not triggered (opposite-hand rule)")
+
+
+def test_slow_no_trigger() -> None:
+    """Entering a zone slowly (below MIN_WRIST_SPEED) must not fire."""
+    det = _fresh_detector()
+    base = {"right_shoulder": (300, 100), "right_elbow": (400, 100)}
+    # Just outside, then a small slow drift inside over 0.2s.
+    det.process_points({**base, "left_wrist": (350, 140)}, 1000.0)
+    res = det.process_points({**base, "left_wrist": (350, 112)}, 1000.2)
+    assert not res["events"], f"slow drift should not fire: {res['events']}"
+    print("ok  slow entry does not trigger")
 
 
 def test_model_smoke() -> None:
@@ -104,7 +117,8 @@ def test_model_smoke() -> None:
 if __name__ == "__main__":
     test_geometry()
     test_hit_logic()
-    test_self_zone_filter()
+    test_opposite_hand_rule()
+    test_slow_no_trigger()
     test_model_smoke()
     print("\nAll tests passed.")
     sys.exit(0)

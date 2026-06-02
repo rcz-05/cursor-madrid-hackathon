@@ -18,7 +18,7 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 from libreyolo import LibreYOLO
 
-from geometry import distance_point_to_segment
+from geometry import segment_to_segment_distance
 from schemas import VisionEvent, VisionResult
 
 Point = Tuple[float, float]
@@ -61,10 +61,12 @@ KEYPOINTS = {
 }
 
 # --- Live-tunable thresholds (the three the demo cares about are the first 3) ---
-ZONE_RADIUS_PX = 45        # how close a wrist must get to a limb to count
-MIN_WRIST_SPEED = 25       # minimum wrist speed (scaled px/s, see _wrist_speed)
-COOLDOWN_MS = 220          # per-zone refractory period to stop sound spam
-MIN_KEYPOINT_CONF = 0.35   # ignore low-confidence joints
+# Tuned strict: a hit only fires on a deliberate, fast strike that actually
+# crosses the limb zone. Smaller radius + higher speed + longer cooldown.
+ZONE_RADIUS_PX = 26        # how close the wrist path must get to a limb (416px frame)
+MIN_WRIST_SPEED = 45       # minimum strike speed (scaled px/s, see _wrist_speed)
+COOLDOWN_MS = 350          # per-zone refractory period to stop sound spam
+MIN_KEYPOINT_CONF = 0.5    # ignore low-confidence joints (strict)
 SPEED_SCALE = 10.0         # divides raw px/s into a friendlier 0..~100 range
 
 MODEL_NAME = "LibreYOLONASs-pose.pt"
@@ -134,6 +136,8 @@ class BodyDrumDetector:
         # keypoint circles, the skeleton, and the six zone capsules.
         outcome["debug"]["keypoints"] = self._overlay_keypoints(person_xy, person_conf, w, h)
         outcome["debug"]["segments"] = self._overlay_segments(points, w, h)
+        # Normalized hit radius so the frontend draws the true trigger box.
+        outcome["debug"]["zone_radius"] = ZONE_RADIUS_PX / w
         return outcome
 
     def _overlay_keypoints(self, xy: np.ndarray, conf: np.ndarray, w: int, h: int):
@@ -213,12 +217,18 @@ class BodyDrumDetector:
                 continue
 
             velocity = self._wrist_speed(hand, wrist, now)
+            prev = self.state.previous_wrists.get(hand)
+            motion_start = prev if prev is not None else wrist
             for zone, segment in zones.items():
-                if self._is_self_zone(hand, zone):
+                if not self._zone_allowed(hand, zone):
                     continue
 
                 pair_key = f"{hand}:{zone}"
-                distance = distance_point_to_segment(wrist, segment[0], segment[1])
+                # Swept hit test: the wrist's motion segment this frame against
+                # the limb zone — catches fast strikes without tunneling.
+                distance = segment_to_segment_distance(
+                    motion_start, wrist, segment[0], segment[1]
+                )
                 inside = distance <= ZONE_RADIUS_PX
                 was_inside = self.state.was_inside.get(pair_key, False)
                 self.state.was_inside[pair_key] = inside
@@ -255,11 +265,16 @@ class BodyDrumDetector:
         return float((dx * dx + dy * dy) ** 0.5 / dt / SPEED_SCALE)
 
     @staticmethod
-    def _is_self_zone(hand: str, zone: str) -> bool:
-        # A wrist sits on the end of its own lower arm, so don't let it trigger
-        # that zone (it would fire constantly).
-        if hand == "left_wrist" and zone == "lower_left_arm":
-            return True
-        if hand == "right_wrist" and zone == "lower_right_arm":
-            return True
-        return False
+    def _zone_allowed(hand: str, zone: str) -> bool:
+        """Strict cross-body rule.
+
+        Arm zones may only be struck by the *opposite* hand (a left wrist hits
+        right-arm zones and vice-versa) — this removes the constant same-side
+        false triggers from a hand resting near its own arm. Legs can be struck
+        by either hand.
+        """
+        if zone.endswith("_arm"):
+            zone_side = "left" if "left" in zone else "right"
+            hand_side = "left" if hand == "left_wrist" else "right"
+            return zone_side != hand_side
+        return True

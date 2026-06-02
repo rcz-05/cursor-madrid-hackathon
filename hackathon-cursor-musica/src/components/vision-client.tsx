@@ -169,11 +169,14 @@ export function VisionClient({ onStart, onHit }: VisionClientProps = {}) {
       if (!ctx) return;
       ctx.clearRect(0, 0, w, h);
 
-      const { keypoints = [], segments = [] } = debugRef.current;
+      const { keypoints = [], segments = [], zone_radius } = debugRef.current;
       if (!keypoints.length) return;
 
       const byName = new Map<string, Keypoint>(keypoints.map((k) => [k.name, k]));
       const now = performance.now();
+      // True hit-box width in display px (diameter = 2 * radius). zone_radius is
+      // normalized to frame width, so scale by canvas width.
+      const hitWidth = (zone_radius ?? 0.06) * w * 2;
 
       // Skeleton lines.
       ctx.lineWidth = 3;
@@ -188,12 +191,13 @@ export function VisionClient({ onStart, onHit }: VisionClientProps = {}) {
         ctx.stroke();
       }
 
-      // Zone capsules (thicker, colored; brighter while flashing from a hit).
+      // Zone capsules drawn at the TRUE hit width, so what you see is exactly
+      // what triggers. Brighter while flashing from a hit.
       ctx.lineCap = "round";
       for (const seg of segments) {
         const flashing = (flashRef.current.get(seg.zone) ?? 0) > now;
-        ctx.lineWidth = flashing ? 22 : 12;
-        ctx.globalAlpha = flashing ? 0.9 : 0.4;
+        ctx.lineWidth = hitWidth;
+        ctx.globalAlpha = flashing ? 0.85 : 0.28;
         ctx.strokeStyle = ZONE_COLORS[seg.zone];
         ctx.beginPath();
         ctx.moveTo(seg.ax * w, seg.ay * h);

@@ -38,6 +38,8 @@ export type VisionDebug = {
   zones?: string[];
   keypoints?: Keypoint[];
   segments?: ZoneSegment[];
+  /** Hit radius, normalized to frame width — draw capsules at this true width. */
+  zone_radius?: number;
   fps?: number;
   device?: string;
 };
