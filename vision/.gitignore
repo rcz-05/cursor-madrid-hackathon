@@ -1,0 +1,9 @@
+# Python env (local only — recreate with: uv venv .venv && uv pip install -r requirements.txt)
+.venv/
+__pycache__/
+*.pyc
+.env
+
+# Model weights (auto-downloaded on first run; too large to track)
+weights/
+*.pt

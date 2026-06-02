@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cámara Cartoon",
-  description: "Da acceso a tu cámara o conéctala desde el móvil con un QR",
+  title: "MemeBongo",
+  description: "Bongo bongo meme bongo",
 };
 
 export default function RootLayout({
