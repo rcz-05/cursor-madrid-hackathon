@@ -28,7 +28,6 @@ export function DrumKit({
 }: DrumKitProps = {}) {
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [lastHit, setLastHit] = useState<string | null>(null);
 
   const unlock = useCallback(async () => {
     setLoading(true);
@@ -41,7 +40,6 @@ export function DrumKit({
     (code: DrumCode) => {
       if (!ready) return;
       DrumPlayer.play(code);
-      setLastHit(`${DRUM_LABELS[code]} · ${code}`);
     },
     [ready],
   );
@@ -102,11 +100,6 @@ export function DrumKit({
         </div>
       )}
 
-      {lastHit && (
-        <p className="text-center font-mono text-sm text-zinc-600 dark:text-zinc-400">
-          Last: {lastHit}
-        </p>
-      )}
     </div>
   );
 }
