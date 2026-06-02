@@ -15,14 +15,21 @@ DrumZone = Literal[
     "left_leg",
 ]
 
-Hand = Literal["left_wrist", "right_wrist"]
+MotionJoint = Literal[
+    "left_elbow",
+    "right_elbow",
+    "left_wrist",
+    "right_wrist",
+    "left_knee",
+    "right_knee",
+]
 
 
 class VisionEvent(TypedDict):
     type: Literal["hit"]
     zone: DrumZone
     confidence: float
-    hand: Hand
+    joint: MotionJoint
     velocity: float
     timestamp: float
 

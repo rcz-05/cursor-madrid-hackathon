@@ -10,13 +10,19 @@ export type DrumZone =
   | "right_leg"
   | "left_leg";
 
-export type Hand = "left_wrist" | "right_wrist";
+export type MotionJoint =
+  | "left_elbow"
+  | "right_elbow"
+  | "left_wrist"
+  | "right_wrist"
+  | "left_knee"
+  | "right_knee";
 
 export type VisionEvent = {
   type: "hit";
   zone: DrumZone;
   confidence: number;
-  hand: Hand;
+  joint: MotionJoint;
   velocity: number;
   timestamp: number;
 };

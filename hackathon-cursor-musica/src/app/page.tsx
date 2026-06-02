@@ -66,8 +66,8 @@ export default function Home() {
                   Cursor Madrid hackaton <span className="text-orange-500">#3</span>
                 </p>
                 <p className="mx-auto mt-3 max-w-md text-sm font-medium text-black/60">
-                  Acepta la cámara y golpea tus brazos y piernas con la mano
-                  contraria para tocar la batería.
+                  Acepta la cámara y mueve brazos y piernas con gestos rápidos
+                  para tocar la batería.
                 </p>
               </header>
 

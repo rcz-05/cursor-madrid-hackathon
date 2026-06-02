@@ -24,41 +24,52 @@ def test_geometry() -> None:
 
 
 def test_hit_logic() -> None:
-    """Drive the hit pipeline with synthetic keypoints across frames."""
-    from detector import BodyDrumDetector, MIN_WRIST_SPEED
+    """Drive the movement pipeline with synthetic keypoints across frames."""
+    from detector import BodyDrumDetector, MIN_LIMB_SPEED
 
-    # Build a detector without loading the model.
     det = BodyDrumDetector.__new__(BodyDrumDetector)
     from detector import VisionState
 
     det.device = "test"
     det.state = VisionState()
 
-    # A right arm to aim at: shoulder->elbow forms upper_right_arm around y=100.
-    base = {
-        "right_shoulder": (300, 100),
-        "right_elbow": (400, 100),
-    }
-
-    # Frame 1: left wrist parked far away (seeds motion history, not inside).
+    # Frame 1: right upper arm at rest (seeds motion history).
     t = 1000.0
-    det.process_points({**base, "left_wrist": (50, 400)}, t)
+    det.process_points(
+        {
+            "right_shoulder": (300, 100),
+            "right_elbow": (400, 100),
+        },
+        t,
+    )
 
-    # Frame 2: left wrist slams into the upper_right_arm zone, moving fast.
-    t += 0.05  # 50 ms later
-    res = det.process_points({**base, "left_wrist": (350, 100)}, t)
+    # Frame 2: fast upward swing of the upper right arm.
+    t += 0.05
+    res = det.process_points(
+        {
+            "right_shoulder": (300, 80),
+            "right_elbow": (400, 40),
+        },
+        t,
+    )
 
     hits = [e for e in res["events"] if e["zone"] == "upper_right_arm"]
     assert hits, f"expected an upper_right_arm hit, got {res['events']}"
-    assert hits[0]["hand"] == "left_wrist"
-    assert hits[0]["velocity"] >= MIN_WRIST_SPEED
-    print("ok  hit detected on zone entry")
+    assert hits[0]["joint"] == "right_elbow"
+    assert hits[0]["velocity"] >= MIN_LIMB_SPEED
+    print("ok  movement hit on upper_right_arm")
 
-    # Frame 3: wrist stays inside -> no new hit (must re-enter, plus cooldown).
+    # Frame 3: arm keeps moving fast -> no re-fire (must drop below threshold first).
     t += 0.05
-    res = det.process_points({**base, "left_wrist": (350, 100)}, t)
-    assert not res["events"], f"stationary-inside should not re-fire: {res['events']}"
-    print("ok  no re-fire while staying inside")
+    res = det.process_points(
+        {
+            "right_shoulder": (300, 60),
+            "right_elbow": (400, 20),
+        },
+        t,
+    )
+    assert not res["events"], f"sustained fast motion should not re-fire: {res['events']}"
+    print("ok  no re-fire while still moving fast")
 
 
 def _fresh_detector():
@@ -70,26 +81,47 @@ def _fresh_detector():
     return det
 
 
-def test_opposite_hand_rule() -> None:
-    """A wrist must NOT trigger a same-side arm zone (only the opposite hand)."""
+def test_same_side_arm_triggers() -> None:
+    """Moving your own arm should trigger its zone (no opposite-hand rule)."""
     det = _fresh_detector()
-    # upper_left_arm zone; the LEFT wrist (same side) slams into it fast.
     base = {"left_shoulder": (300, 100), "left_elbow": (400, 100)}
-    det.process_points({**base, "left_wrist": (50, 400)}, 1000.0)
-    res = det.process_points({**base, "left_wrist": (350, 100)}, 1000.05)
-    assert all(e["zone"] != "upper_left_arm" for e in res["events"]), res["events"]
-    print("ok  same-side arm not triggered (opposite-hand rule)")
+    det.process_points(base, 1000.0)
+    res = det.process_points(
+        {"left_shoulder": (300, 60), "left_elbow": (400, 20)},
+        1000.05,
+    )
+    hits = [e for e in res["events"] if e["zone"] == "upper_left_arm"]
+    assert hits, f"same-side arm swing should fire: {res['events']}"
+    print("ok  same-side arm movement triggers")
 
 
 def test_slow_no_trigger() -> None:
-    """Entering a zone slowly (below MIN_WRIST_SPEED) must not fire."""
+    """Slow drift below MIN_LIMB_SPEED must not fire."""
     det = _fresh_detector()
     base = {"right_shoulder": (300, 100), "right_elbow": (400, 100)}
-    # Just outside, then a small slow drift inside over 0.2s.
-    det.process_points({**base, "left_wrist": (350, 140)}, 1000.0)
-    res = det.process_points({**base, "left_wrist": (350, 112)}, 1000.2)
+    det.process_points(base, 1000.0)
+    res = det.process_points(
+        {"right_shoulder": (300, 98), "right_elbow": (400, 96)},
+        1000.2,
+    )
     assert not res["events"], f"slow drift should not fire: {res['events']}"
-    print("ok  slow entry does not trigger")
+    print("ok  slow movement does not trigger")
+
+
+def test_leg_sensitivity() -> None:
+    """Leg zones use a lower speed threshold than arms."""
+    from detector import BodyDrumDetector, MIN_LEG_SPEED, MIN_LIMB_SPEED
+
+    det = _fresh_detector()
+    assert MIN_LEG_SPEED < MIN_LIMB_SPEED
+
+    base = {"left_hip": (300, 300), "left_knee": (300, 400)}
+    det.process_points(base, 1000.0)
+    # Moderate kick — fast enough for legs, too slow for arms.
+    res = det.process_points({"left_hip": (300, 295), "left_knee": (300, 370)}, 1000.05)
+    hits = [e for e in res["events"] if e["zone"] == "left_leg"]
+    assert hits, f"leg should trigger at lower threshold: {res['events']}"
+    print("ok  leg sensitivity")
 
 
 def test_model_smoke() -> None:
@@ -117,8 +149,9 @@ def test_model_smoke() -> None:
 if __name__ == "__main__":
     test_geometry()
     test_hit_logic()
-    test_opposite_hand_rule()
+    test_same_side_arm_triggers()
     test_slow_no_trigger()
+    test_leg_sensitivity()
     test_model_smoke()
     print("\nAll tests passed.")
     sys.exit(0)

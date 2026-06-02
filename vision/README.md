@@ -1,8 +1,8 @@
 # Vision backend — Body Drum
 
 Pose-based "body drum": a webcam sees one person, the backend detects pose
-keypoints, builds six limb zones, and emits a `hit` event when a moving wrist
-strikes a zone. The music/frontend branches turn those events into sound.
+keypoints, tracks six limb segments, and emits a `hit` event when a limb
+*starts moving fast*. The music/frontend branches turn those events into sound.
 
 ## Stack
 
@@ -50,7 +50,7 @@ bundled sample image.
 | file | role |
 |------|------|
 | `server.py` | FastAPI app, `/health`, `/ws/vision` WebSocket |
-| `detector.py` | `BodyDrumDetector` — pose → zones → hit events |
+| `detector.py` | `BodyDrumDetector` — pose → limb movement → hit events |
 | `geometry.py` | point-to-segment distance (limb capsule test) |
 | `schemas.py` | `VisionEvent` / `VisionResult` shapes |
 | `test_detector.py` | unit + smoke tests |
@@ -69,7 +69,7 @@ Server → client:
 {
   "events": [
     { "type": "hit", "zone": "upper_right_arm", "confidence": 0.87,
-      "hand": "left_wrist", "velocity": 42.5, "timestamp": 1717351200.123 }
+      "joint": "right_elbow", "velocity": 42.5, "timestamp": 1717351200.123 }
   ],
   "debug": { "person_detected": true, "fps": 8.5, "device": "mps", "zones": ["..."] }
 }
@@ -83,7 +83,8 @@ The six zones: `upper_left_arm`, `lower_left_arm`, `upper_right_arm`,
 In `detector.py`:
 
 ```python
-ZONE_RADIUS_PX = 45     # how close a wrist must get to a limb
-MIN_WRIST_SPEED = 25    # minimum wrist speed to count as a strike
-COOLDOWN_MS = 220       # per-zone refractory period
+MIN_LIMB_SPEED = 32     # arm speed threshold (rising edge)
+MIN_LEG_SPEED = 20      # leg speed threshold — lower = more sensitive kicks
+COOLDOWN_MS = 280       # arm refractory period
+LEG_COOLDOWN_MS = 200   # leg refractory period
 ```

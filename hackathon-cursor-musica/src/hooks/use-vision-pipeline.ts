@@ -33,6 +33,7 @@ const ZONE_COLORS: Record<DrumZone, string> = {
 
 // Map each body zone to one of the six drum codes. DrumPlayer.play() also fires
 // the global on-screen sound-name overlay (KICK / SNARE / HI-HAT …).
+// upper_right_arm → arm_right_high (alias: arm_right_top / crash / memes)
 const ZONE_TO_DRUM: Record<DrumZone, DrumCode> = {
   upper_left_arm: "arm_left_high", // HI-HAT
   lower_left_arm: "arm_left_low", // SNARE
@@ -47,8 +48,8 @@ export type VisionStatus = "idle" | "connecting" | "connected" | "closed" | "err
 /**
  * Drives the full body-drum pipeline on a webcam: streams frames to the Python
  * backend over WebSocket, draws the pose overlay (skeleton + keypoints + zone
- * capsules at their true hit width) on `overlayRef`, and plays the matching
- * drum (with the global name flash) on every hit.
+ * capsules) on `overlayRef`, and plays the matching drum (with the global name
+ * flash) when a limb starts moving fast.
  *
  * Attach the three refs to a <video>, an overlay <canvas>, and a hidden <canvas>.
  */
@@ -139,7 +140,7 @@ export function useVisionPipeline() {
         if (data.events?.length) {
           for (const event of data.events) {
             flashRef.current.set(event.zone, performance.now() + FLASH_MS);
-            setLastEvent(`${event.zone} · ${event.hand}`);
+            setLastEvent(`${event.zone} · ${event.joint}`);
             setHitCount((c) => c + 1);
             DrumPlayer.play(ZONE_TO_DRUM[event.zone], Math.min(1, Math.max(0.3, event.velocity / 80)));
             window.dispatchEvent(
@@ -208,7 +209,7 @@ export function useVisionPipeline() {
         ctx.stroke();
       }
 
-      // Zone capsules at the TRUE hit width — what you see is what triggers.
+      // Zone capsules — flash on movement hit.
       ctx.lineCap = "round";
       for (const seg of segments) {
         const flashing = (flashRef.current.get(seg.zone) ?? 0) > now;
