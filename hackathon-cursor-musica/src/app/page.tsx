@@ -92,12 +92,14 @@ export default function Home() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-10 bg-amber-100 px-6 py-16">
       <header className="text-center">
-        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-          📸 Cámara Cartoon
+        <h1 className="text-6xl font-extrabold tracking-tight text-black sm:text-5xl">
+          Meme <span className="text-orange-500">Bongo</span>
         </h1>
         <p className="mt-3 max-w-md text-lg font-medium text-black/70">
-          Dale al botón, acepta el permiso y verás la cámara del ordenador a
-          pantalla completa.
+          i like to Bongo bongo meme bongo
+        </p>
+        <p className="text-sm text-black/70">
+          Cursor Madrid hackaton <span className="text-orange-500">#3</span>
         </p>
       </header>
 
@@ -106,7 +108,9 @@ export default function Home() {
         disabled={state === "loading"}
         className="cartoon-btn rounded-2xl bg-yellow-300 px-10 py-5 text-2xl font-extrabold text-black disabled:opacity-60"
       >
-        {state === "loading" ? "Pidiendo permiso…" : "🎥 Dar acceso a la cámara"}
+        {state === "loading"
+          ? "Pidiendo permiso…"
+          : "🎥 Dar acceso a la cámara"}
       </button>
 
       {state === "error" && (
